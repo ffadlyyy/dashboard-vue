@@ -9,7 +9,7 @@ const keadaan = ref("idle"); // idle | loading | empty | error | success
 async function muatPengguna() {
   keadaan.value = "loading";
   try {
-      const response = await fetch("https://jsonplaceholder.typicode.com/users");
+    const response = await fetch("https://jsonplaceholder.typicode.com/users");
     if (!response.ok) {
       throw new Error("Status HTTP: " + response.status);
     }
@@ -36,6 +36,17 @@ const penggunaTersaring = computed(() => {
   );
 });
 
+// Problem 2: sort berantai (hasil search diurutkan)
+const arahUrutan = ref("asc"); // "asc" | "desc"
+const penggunaTerurut = computed(() => {
+  const salinan = [...penggunaTersaring.value];
+  return salinan.sort((a, b) =>
+    arahUrutan.value === "asc"
+      ? a.name.localeCompare(b.name)
+      : b.name.localeCompare(a.name)
+  );
+});
+
 const jumlahHasil = computed(() => penggunaTersaring.value.length);
 
 watch(queryPencarian, (nilaiBaru) => {
@@ -50,15 +61,36 @@ watch(queryPencarian, (nilaiBaru) => {
     <h1>{{ judul }}</h1>
   </header>
   <main class="app-main">
-    <button @click="muatPengguna">Muat Pengguna</button>
-    <input v-model="queryPencarian" type="text" placeholder="Cari username..." />
+    <div class="toolbar">
+      <button class="btn" @click="muatPengguna">Muat Pengguna</button>
+      <input
+        class="input-cari"
+        v-model="queryPencarian"
+        type="text"
+        placeholder="Cari username..."
+      />
+      <button
+        class="btn-urut"
+        :class="{ 'btn-urut--aktif': arahUrutan === 'asc' }"
+        @click="arahUrutan = 'asc'"
+      >
+        Urutkan A-Z
+      </button>
+      <button
+        class="btn-urut"
+        :class="{ 'btn-urut--aktif': arahUrutan === 'desc' }"
+        @click="arahUrutan = 'desc'"
+      >
+        Urutkan Z-A
+      </button>
+    </div>
     <p>Menampilkan {{ jumlahHasil }} dari {{ users.length }} pengguna</p>
     <p v-if="keadaan === 'loading'">Memuat data...</p>
     <p v-else-if="keadaan === 'empty'">Tidak ada pengguna ditemukan.</p>
     <p v-else-if="keadaan === 'error'">Gagal memuat data. Coba lagi.</p>
     <ul v-else-if="keadaan === 'success'">
       <UserCard
-        v-for="user in penggunaTersaring"
+        v-for="user in penggunaTerurut"
         :key="user.id"
         :user="user"
         :sorotan="user.username.toLowerCase() === queryPencarian.toLowerCase().trim()"
@@ -75,5 +107,36 @@ watch(queryPencarian, (nilaiBaru) => {
 }
 .app-main {
   padding: 1.5rem;
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.btn {
+  padding: 0.25rem 0.8rem;
+  border: 1px solid #0b4f6c;
+  border-radius: 6px;
+  background: #0b4f6c;
+  color: white;
+  cursor: pointer;
+}
+.input-cari {
+  padding: 0.3rem 0.6rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+.btn-urut {
+  padding: 0.25rem 0.8rem;
+  border: 1px solid #0b4f6c;
+  border-radius: 6px;
+  background: white;
+  color: #0b4f6c;
+  cursor: pointer;
+}
+.btn-urut--aktif {
+  background: #0b4f6c;
+  color: white;
 }
 </style>

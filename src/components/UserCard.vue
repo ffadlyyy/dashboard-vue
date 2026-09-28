@@ -43,7 +43,7 @@ const detailTerbuka = ref(false);
 .user-card {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #e0e0e0;
 }
